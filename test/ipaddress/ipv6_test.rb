@@ -344,6 +344,50 @@ class IPv6Test < Minitest::Test
     assert_equal nil, ip1 <=> ip2
     assert_equal nil, ip1 <=> not_ip
   end
+  
+  def test_method_add
+    ip = IPAddress::IPv6.new("fc42:1337::/64")
+    assert_equal ip.add(5), IPAddress::IPv6.new("fc42:1337::5/64")
+    assert_equal ip.add(IPAddress::IPv6.new("::5/42")), IPAddress::IPv6.new("fc42:1337::5/64")
+    assert_equal ip.add(50), IPAddress::IPv6.new("fc42:1337::32/64")
+    ip = IPAddress::IPv6.new("fc42:1337::/120")
+    assert_equal ip.add(2), IPAddress::IPv6.new("fc42:1337::2/120")
+    assert_raises(RuntimeError) {ip.add(256)}
+    assert_equal ip.add(256, false), IPAddress::IPv6.new("fc42:1337::100/120")
+  end
+
+  def test_method_subtract
+    ip = IPAddress::IPv6.new("fc42:1337::5/64")
+    assert_equal ip.subtract(5), IPAddress::IPv6.new("fc42:1337::/64")
+    assert_equal ip.subtract(IPAddress::IPv6.new("::5/12")), IPAddress::IPv6.new("fc42:1337::0/64")
+    assert_raises(RuntimeError) {ip.subtract(11)}
+    assert_raises(RuntimeError) {ip.subtract(IPAddress::IPv6.new("::11/66"))}
+  end
+  
+  def test_method_hostpart
+    ip = IPAddress::IPv6.new("fc42:1337:0:5::7/64")
+    assert_equal ip.hostpart.to_s, "::7"
+  end
+
+  def test_method_advance_network
+    ip = IPAddress::IPv6.new("fc42:1337:0:0::/64")
+    assert_equal ip.advance_network(5), IPAddress::IPv6.new("fc42:1337:0:5::/64")
+  end
+
+  def test_method_next_network
+    ip = IPAddress::IPv6.new("fc42:1337:0:0::/64")
+    assert_equal ip.next_network, IPAddress::IPv6.new("fc42:1337:0:1::/64")
+  end
+  
+  def test_method_regress_network
+    ip = IPAddress::IPv6.new("fc42:1337:0:5::/64")
+    assert_equal ip.regress_network(4), IPAddress::IPv6.new("fc42:1337:0:1::/64")
+  end
+  
+  def test_method_previous_network
+    ip = IPAddress::IPv6.new("fc42:1337:0:5::/64")
+    assert_equal ip.previous_network, IPAddress::IPv6.new("fc42:1337:0:4::/64")
+  end  
 
   def test_classmethod_expand
     compressed = "2001:db8:0:cd30::"
