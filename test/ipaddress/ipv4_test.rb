@@ -422,7 +422,7 @@ class IPv4Test < Minitest::Test
 
     ip2 = @klass.new("172.16.12.2/24")
     assert_equal [ip1.network.to_string, ip2.network.to_string], 
-    (ip1 + ip2).map{|i| i.to_string}
+                 (ip1 + ip2).map{|i| i.to_string}
 
     ip1 = @klass.new("10.0.0.0/23")
     ip2 = @klass.new("10.0.2.0/24")
@@ -500,6 +500,57 @@ class IPv4Test < Minitest::Test
     assert_equal "172.16.8.0/22", @ip.supernet(22).to_string
   end
 
+  def test_method_add
+    ip = IPAddress::IPv4.new("172.16.10.1/24")
+    assert_equal ip.add(5), IPAddress::IPv4.new("172.16.10.6/24")
+    assert_equal ip.add(IPAddress::IPv4.new("0.0.0.5/6")), IPAddress::IPv4.new("172.16.10.6/24")
+    assert_equal ip.add(50), IPAddress::IPv4.new("172.16.10.51/24")
+    assert_equal ip.add(254), IPAddress::IPv4.new("172.16.10.255/24")
+    assert_raises(RuntimeError) {ip.add(255)}
+    assert_equal ip.add(255, false), IPAddress::IPv4.new("172.16.11.0/24")
+    assert_raises(RuntimeError) {ip.add(1000)}
+    ip = IPAddress::IPv4.new("172.16.10.1/30")
+    assert_equal ip.add(2), IPAddress::IPv4.new("172.16.10.3/30")
+    assert_raises(RuntimeError) {ip.add(3)}
+  end
+
+  def test_method_subtract
+    ip = IPAddress::IPv4.new("172.16.10.10/24")
+    assert_equal ip.subtract(5), IPAddress::IPv4.new("172.16.10.5/24")
+    assert_equal ip.subtract(IPAddress::IPv4.new("0.0.0.5/32")), IPAddress::IPv4.new("172.16.10.5/24")
+    assert_equal ip.subtract(10), IPAddress::IPv4.new("172.16.10.0/24")
+    assert_raises(RuntimeError) {ip.subtract(11)}
+    assert_equal ip.subtract(11, false), IPAddress::IPv4.new("172.16.9.255/24")
+    assert_raises(RuntimeError) {ip.subtract(IPAddress::IPv4.new("0.0.0.11/16"))}
+  end
+  
+  def test_method_hostpart
+    ip = IPAddress::IPv4.new("172.16.10.64/24")
+    assert_equal ip.hostpart.to_s, "0.0.0.64"
+    ip = IPAddress::IPv4.new("172.16.10.130/25")
+    assert_equal ip.hostpart.to_s, "0.0.0.2"
+  end
+  
+  def test_method_advance_network
+    ip = IPAddress::IPv4.new("172.16.10.64/24")
+    assert_equal ip.advance_network(42), IPAddress::IPv4.new("172.16.52.0/24")
+  end
+
+  def test_method_next_network
+    ip = IPAddress::IPv4.new("172.16.10.64/24")
+    assert_equal ip.next_network, IPAddress::IPv4.new("172.16.11.0/24")
+  end
+  
+  def test_method_regress_network
+    ip = IPAddress::IPv4.new("172.16.10.64/24")
+    assert_equal ip.regress_network(5), IPAddress::IPv4.new("172.16.5.0/24")
+  end
+  
+  def test_method_previous_network
+    ip = IPAddress::IPv4.new("172.16.10.64/24")
+    assert_equal ip.previous_network, IPAddress::IPv4.new("172.16.9.0/24")
+  end  
+  
   def test_classmethod_parse_u32
     @decimal_values.each do  |addr,int|
       ip = @klass.parse_u32(int)

@@ -326,7 +326,110 @@ module IPAddress;
       to_hex.reverse.gsub(/./){|c| c+"."} + "ip6.arpa"
     end
     alias_method :arpa, :reverse
+    
+    #
+    # Returns a new IPv6 object which is the result 
+    # of advancing this IP address by a given value.
+    # In other words, this arithmetically adds IP addresses.
+    #
+    # Will raise an error if the resulting address is in a different subnet,
+    # except validating is set to false.
+    #
+    # Example:
+    #
+    #   ip = IPAddress::IPv6.new("fc42:1337::/64")
+    #   ip.add(5).to_string
+    #     #=> "fc42:1337::5/64"
+    def add(oth, validating=true)
+      oth = oth.to_i if oth.kind_of? IPAddress::IPv6 # oth shall be integer
+      
+      new_obj = self.class.parse_u128(self.to_i + oth, prefix)
+      
+      if validating and self.network_u128 != new_obj.network_u128
+        raise RuntimeError, "Subnet (/#{@prefix}) is not large enough."
+      end
+      
+      new_obj
+    end
+    
+    #
+    # Returns a new IPv6 object which is the result 
+    # of decreasing this IP address by a given value.
+    # In other words, this arithmetically subtracts IP addresses.
+    #
+    # Will raise an error if the resulting address is in a different subnet,
+    # except validating is set to false.
+    #
+    # Example:
+    #
+    #   ip = IPAddress::IPv6.new("fc42:1337::a/64")
+    #   ip.subtract(5).to_string
+    #     #=> "fc42:1337::5/64"
+    def subtract(oth, validating=true)
+      oth = oth.to_i if oth.kind_of? IPAddress::IPv6 # oth shall be integer
+      add(-oth, validating)
+    end
 
+    #
+    # Returns the network address of the n-th network succeeding this one.
+    #
+    # Example:
+    #
+    #   ip = IPAddress::IPv6.new("fc42:1337:0:0::/64")
+    #   ip.advance_network(5).to_string
+    #     #=> "fc42:1337:0:5::/64"
+    def advance_network(amount)
+      IPAddress::IPv6.parse_u128(self.network.to_i + amount*self.size, @prefix)
+    end
+    
+    #
+    # Returns the network address of the network succeeding this one.
+    #
+    # Example:
+    #
+    #   ip = IPAddress::IPv6.new("fc42:1337:0:0::/64")
+    #   ip.next_network.to_string
+    #     #=> "fc42:1337:0:1::/64"
+    def next_network
+      advance_network 1
+    end
+    
+    #
+    # Returns the network address of the n-th network preceeding this one.
+    #
+    # Example:
+    #
+    #   ip = IPAddress::IPv6.new("fc42:1337:0:5::/64")
+    #   ip.regress_network(4).to_string
+    #     #=> "fc42:1337:0:1::/64"
+    def regress_network(amount)
+      advance_network -amount
+    end
+    
+    #
+    # Returns the network address of the network preceeding this one.
+    #
+    # Example:
+    #
+    #   ip = IPAddress::IPv6.new("fc42:1337:0:5::/64")
+    #   ip.previous_network.to_string
+    #     #=> "fc42:1337:0:4::/64"
+    def previous_network
+      regress_network 1
+    end
+    
+    #
+    # Returns a new IPv6 object containing only the host part of this IP.
+    #
+    #   ip = IPAddress::IPv6.new("fc42:1337:0:5::7/64")
+    #
+    #   ip.hostpart.to_s
+    #     #=> "::7"
+    #
+    def hostpart
+      self.class.parse_u128(hostpart_u128, 128)
+    end
+    
     #
     # Returns the network number in Unsigned 128bits format
     #
@@ -337,6 +440,18 @@ module IPAddress;
     #
     def network_u128
       to_u128 & @prefix.to_u128
+    end
+    
+    #
+    # Returns this address' host part in unsigned 128bits format
+    #
+    #   ip = IPAddress::IPv6.new("fc42:1337:0:5::7/64")
+    #
+    #   ip.host_u128
+    #     #=> 7
+    #
+    def hostpart_u128
+      to_u128 & ~@prefix.to_u128
     end
 
     #
