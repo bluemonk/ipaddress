@@ -492,6 +492,35 @@ module IPAddress;
     end
 
     #
+    # Returns the successor to the IP address
+    #
+    # Example:
+    #
+    #   ip6 = IPAddress("2001:db8::8:800:200c:417a/64")
+    #
+    #   ip6.succ.to_string
+    #     => "2001:db8::8:800:200c:417b/64"
+    #
+    def succ
+      IPAddress::IPv6.parse_u128(to_u128.succ, prefix)
+    end
+    alias_method :next, :succ
+
+    #
+    # Returns the predecessor to the IP address
+    #
+    # Example:
+    #
+    #   ip6 = IPAddress("2001:db8::8:800:200c:417a/64")
+    #
+    #   ip6.pred.to_string
+    #     => "2001:db8::8:800:200c:4179/64"
+    #
+    def pred
+      IPAddress::IPv6.parse_u128(to_u128.pred, prefix)
+    end
+
+    #
     # Spaceship operator to compare IPv6 objects
     #
     # Comparing IPv6 addresses is useful to ordinate

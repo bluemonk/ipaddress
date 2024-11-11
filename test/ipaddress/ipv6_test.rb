@@ -282,6 +282,35 @@ class IPv6Test < Minitest::Test
     assert_equal expected, arr
   end
 
+  def test_method_succ
+    ip = @klass.new("2001:db8:0:cd30::/64")
+    assert_instance_of @klass, ip.succ
+    assert_equal  "2001:db8:0:cd30::1/64", ip.succ.to_string
+    ip = @klass.new("::")
+    assert_instance_of @klass, ip.succ
+    assert_equal  "::1/128", ip.succ.to_string
+    ip = @klass.new("::1")
+    assert_instance_of @klass, ip.succ
+    assert_equal  "::2/128", ip.succ.to_string
+    ip = @klass.new("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff/64")
+    assert_instance_of @klass, ip.succ
+    assert_equal  "::/64", ip.succ.to_string
+  end
+
+  def test_method_pred
+    ip = @klass.new("2001:db8:0:cd30::/64")
+    assert_instance_of @klass, ip.pred
+    assert_equal  "2001:db8:0:cd2f:ffff:ffff:ffff:ffff/64", ip.pred.to_string
+    ip = @klass.new("::")
+    assert_instance_of @klass, ip.pred
+    assert_equal  "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff/128", ip.pred.to_string
+    ip = @klass.new("::1")
+    assert_instance_of @klass, ip.pred
+    assert_equal  "::/128", ip.pred.to_string
+    ip = @klass.new("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff/64")
+    assert_instance_of @klass, ip.pred
+    assert_equal  "ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffe/64", ip.pred.to_string
+
   def test_allocate_addresses
     ip = @klass.new("2001:db8::4/125")
     ip1 = ip.allocate

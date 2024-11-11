@@ -479,6 +479,35 @@ module IPAddress;
     end
 
     #
+    # Returns the successor to the IP address
+    #
+    # Example:
+    #
+    #   ip = IPAddress("192.168.45.23/16")
+    #
+    #   ip.succ.to_string
+    #     => "192.168.45.24/16"
+    #
+    def succ
+      self.class.new("#{IPAddress.ntoa(to_u32.succ % 0x100000000)}/#{prefix}")
+    end
+    alias_method :next, :succ
+
+    #
+    # Returns the predecessor to the IP address
+    #
+    # Example:
+    #
+    #   ip = IPAddress("192.168.45.23/16")
+    #
+    #   ip.pred.to_string
+    #     => "192.168.45.22/16"
+    #
+    def pred
+      self.class.new("#{IPAddress.ntoa(to_u32.pred % 0x100000000)}/#{prefix}")
+    end
+
+    #
     # Spaceship operator to compare IPv4 objects
     #
     # Comparing IPv4 addresses is useful to ordinate

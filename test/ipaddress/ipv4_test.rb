@@ -258,6 +258,36 @@ class IPv4Test < Minitest::Test
     assert_equal expected, arr
   end
 
+  def test_method_succ
+    ip = @klass.new("192.168.100.0/24")
+    assert_instance_of @klass, ip.succ
+    assert_equal  "192.168.100.1/24", ip.succ.to_string
+    ip = @klass.new("192.168.100.50/24")
+    assert_instance_of @klass, ip.succ
+    assert_equal  "192.168.100.51/24", ip.succ.to_string
+    ip = @klass.new("0.0.0.0/32")
+    assert_instance_of @klass, ip.succ
+    assert_equal  "0.0.0.1/32", ip.succ.to_string
+    ip = @klass.new("255.255.255.255/32")
+    assert_instance_of @klass, ip.succ
+    assert_equal  "0.0.0.0/32", ip.succ.to_string
+  end
+
+  def test_method_pred
+    ip = @klass.new("192.168.100.0/24")
+    assert_instance_of @klass, ip.pred
+    assert_equal  "192.168.99.255/24", ip.pred.to_string
+    ip = @klass.new("192.168.100.50/24")
+    assert_instance_of @klass, ip.pred
+    assert_equal  "192.168.100.49/24", ip.pred.to_string
+    ip = @klass.new("0.0.0.0/32")
+    assert_instance_of @klass, ip.pred
+    assert_equal  "255.255.255.255/32", ip.pred.to_string
+    ip = @klass.new("255.255.255.255/32")
+    assert_instance_of @klass, ip.pred
+    assert_equal  "255.255.255.254/32", ip.pred.to_string
+  end
+
   def test_method_size
     ip = @klass.new("10.0.0.1/29")
     assert_equal 8, ip.size
