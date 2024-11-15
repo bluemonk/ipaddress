@@ -73,19 +73,37 @@ class Prefix32Test < Minitest::Test
     end
   end
 
+  def test_method_cmp
+    p1 = @klass.new 8
+    p2 = @klass.new 24
+    assert_equal false, (p1 > 16)
+    assert_equal true,  (p2 > 16)
+    assert_equal true,  (16 >= p1)
+    assert_equal false, (16 >= p2)
+    assert_equal true,  (p1 < p2)
+    assert_equal true,  (p1 == 8r)
+    assert_equal true,  (24r == p2)
+  end
+
   def test_method_plus
     p1 = @klass.new 8
     p2 = @klass.new 10
     assert_equal 18, p1+p2
     assert_equal 12, p1+4
+    assert_equal 14r, p2+4r
+    assert_equal 12r, 4r+p1
   end
 
   def test_method_minus
     p1 = @klass.new 8
     p2 = @klass.new 24
-    assert_equal 16, p1-p2
+    assert_equal -16, p1-p2
     assert_equal 16, p2-p1
     assert_equal 20, p2-4
+    assert_equal 20r, p2-4r
+    assert_equal 24, 32-p1
+    assert_equal 8, 32-p2
+    assert_equal 8r, 32r-p2
   end
 
   def test_initialize
