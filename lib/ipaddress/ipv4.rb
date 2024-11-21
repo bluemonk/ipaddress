@@ -107,6 +107,18 @@ module IPAddress;
     end
 
     #
+    # When serializing to JSON format, just use the string representation
+    #
+    #   ip = IPAddress("172.16.100.4/22")
+    #
+    #   ip.as_json
+    #     #=> "172.16.100.4/22"
+    #
+    def as_json
+      to_string
+    end
+
+    #
     # Returns the prefix portion of the IPv4 object
     # as a IPAddress::Prefix32 object
     #

@@ -135,6 +135,11 @@ class IPv4Test < Minitest::Test
     assert_raises(ArgumentError) { @klass.new }
   end
 
+  def test_method_as_json
+    ip = @klass.new("172.16.100.4/22")
+    assert_equal "172.16.100.4/22", ip.as_json
+  end
+
   def test_method_data
     if RUBY_VERSION < "2.0"
       assert_equal "\254\020\n\001", @ip.data

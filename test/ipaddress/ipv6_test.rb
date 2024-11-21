@@ -97,6 +97,11 @@ class IPv6Test < Minitest::Test
     assert_equal @arr, @ip.groups
   end
 
+  def test_method_as_json
+    ip = @klass.new("2001:db8::8:800:200c:417a/64")
+    assert_equal "2001:db8::8:800:200c:417a/64", ip.as_json
+  end
+
   def test_method_hexs
     arr = "2001:0db8:0000:0000:0008:0800:200c:417a".split(":")
     assert_equal arr, @ip.hexs
