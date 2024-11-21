@@ -341,8 +341,8 @@ class IPv6Test < Minitest::Test
     ip1 = @klass.new('::1')
     ip2 = IPAddress::IPv4.new('127.0.0.1')
     not_ip = String
-    assert_equal nil, ip1 <=> ip2
-    assert_equal nil, ip1 <=> not_ip
+    assert_nil ip1 <=> ip2
+    assert_nil ip1 <=> not_ip
   end
 
   def test_classmethod_expand
