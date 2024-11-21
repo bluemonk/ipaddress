@@ -384,7 +384,7 @@ module IPAddress;
     #     #=> false
     #
     def include?(oth)
-      @prefix <= oth.prefix and network_u128 == self.class.new(oth.address+"/#@prefix").network_u128
+      @prefix <= oth.prefix and network_u128 == (oth.to_u128 & @prefix.to_u128)
     end
 
     #
