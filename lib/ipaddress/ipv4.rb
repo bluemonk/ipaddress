@@ -515,6 +515,23 @@ module IPAddress;
       return prefix <=> oth.prefix if to_u32 == oth.to_u32  
       to_u32 <=> oth.to_u32
     end
+
+    #
+    # Check if 2 IPs (ranges) are equal
+    #
+    # Example:
+    #
+    #   ip1 = IPAddress '10.0.0.0/24'
+    #   ip2 = IPAddress '10.0.0.0/24'
+    #   ip3 = IPAddress '10.0.0.0/25'
+    #
+    #   ip1.eql? ip2 # => true
+    #   ip2.eql? ip1 # => true
+    #   ip1.eql? ip3 # => false
+    def eql?(other)
+      (!other.is_a? self.class) || (prefix == other.prefix && to_u32 == other.to_u32)
+    end
+
     alias eql? ==
     
     #

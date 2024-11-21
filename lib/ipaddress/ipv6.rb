@@ -525,9 +525,27 @@ module IPAddress;
     #
     def <=>(oth)
       return nil unless oth.is_a?(self.class)
-      return prefix <=> oth.prefix if to_u128 == oth.to_u128  
+      return prefix <=> oth.prefix if to_u128 == oth.to_u128
       to_u128 <=> oth.to_u128
     end
+
+    # Check if 2 IPs (ranges) are equal
+    #
+    # Example:
+    #
+    #   ip1 = IPAddress "2001:db8:1::1/64"
+    #   ip2 = IPAddress "2001:db8:1::1/64"
+    #   ip3 = IPAddress "2001:db8:1::1/65"
+    #   ip4 = IPAddress "2001:db8:2::1/65"
+    #
+    #   ip1.eql? ip2 # => true
+    #   ip2.eql? ip1 # => true
+    #   ip1.eql? ip3 # => false
+    #   ip4.eql? ip3 # => false
+    def eql?(other)
+      (!other.is_a? self.class) || (prefix == other.prefix && to_u128 == oth.to_u128)
+    end
+
     alias eql? ==
 
     #
