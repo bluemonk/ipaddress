@@ -589,6 +589,38 @@ module IPAddress;
     end
 
     #
+    # This method implements the subnetting function 
+    # similar to the one described in RFC3531.
+    #
+    # By specifying a new prefix, the method calculates
+    # the network number for the given IPv6 object
+    # and calculates the subnets associated to the new
+    # prefix.
+    #
+    # For example, given the following network:
+    #
+    #   ip = IPAddress "2001:db8:8:800::/64"
+    #
+    # we can calculate the subnets with a /66 prefix
+    #
+    #   ip.subnets(66).map{&:to_string)
+    #     #=> ["2001:db8:8:800::/66", "2001:db8:8:800:4000::/66", "2001:db8:8:800:8000::/66", 
+    #      "2001:db8:8:800:c000::/66"]
+    #
+    # The resulting number of subnets will of course always be
+    # a power of two.
+    #
+
+    def subnet(subprefix)
+      unless ((@prefix.to_i)..128).include? subprefix
+        raise ArgumentError, "New prefix must be between #@prefix and 128"
+      end
+      Array.new(2**(subprefix-@prefix.to_i)) do |i|
+        self.class.parse_u128(network_u128+(i*(2**(128-subprefix))), subprefix)
+      end
+    end
+
+    #
     # Extract 16 bits groups from a string
     #
     def self.groups(str)

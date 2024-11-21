@@ -171,6 +171,18 @@ class IPv6Test < Minitest::Test
     ip = @klass.new("2001:db8::8:800:200c:417a/124")
     assert_equal 2**4, ip.size
   end
+####Fill out proper ipv6 values... not sure how to do that math by hand yet.
+  def test_method_subnet
+    assert_raises(ArgumentError) {@network.subnet(62)}
+    assert_raises(ArgumentError) {@network.subnet(129)}
+    arr = ["2001:db8:8:800::/66", "2001:db8:8:800:4000::/66", "2001:db8:8:800:8000::/66", 
+           "2001:db8:8:800:c000::/66"]
+    assert_equal arr, @network.subnet(66).map {|s| s.to_string}
+    arr = ["2001:db8:8:800::/65", "2001:db8:8:800:8000::/65"]
+    assert_equal arr, @network.subnet(65).map {|s| s.to_string}
+    arr = ["2001:db8:8:800::/64"]
+    assert_equal arr, @network.subnet(64).map {|s| s.to_string}
+  end
 
   def test_method_include?
     assert_equal true, @ip.include?(@ip)
