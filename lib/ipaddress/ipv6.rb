@@ -614,14 +614,13 @@ module IPAddress;
     #
     # With that data you can create a new IPv6 object:
     #
-    #   ip6 = IPAddress::IPv6::parse_data " \001\r\270\000\000\000\000\000\b\b\000 \fAz"
-    #   ip6.prefix = 64
+    #   ip6 = IPAddress::IPv6::parse_data " \001\r\270\000\000\000\000\000\b\b\000 \fAz", 64
     #
     #   ip6.to_s
     #     #=> "2001:db8::8:800:200c:417a/64"
     #
-    def self.parse_data(str)
-      self.new(IN6FORMAT % str.unpack("n8"))
+    def self.parse_data(str, prefix=128)
+      return self.new(IN6FORMAT % str.unpack("n8") + '/' + prefix.to_s)
     end
 
     #

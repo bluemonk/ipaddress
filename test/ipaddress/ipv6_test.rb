@@ -371,6 +371,12 @@ class IPv6Test < Minitest::Test
     assert_equal "2001:db8::8:800:200c:417a/128", ip.to_string
   end
 
+  def test_classmethod_parse_data_with_prefix
+    str = " \001\r\270\000\000\000\000\000\b\b\000 \fAz"
+    ip = @klass.parse_data str, 64
+    assert_equal "2001:db8::8:800:200c:417a/64", ip.to_string
+  end
+
   def test_classhmethod_parse_u128
     @valid_ipv6.each do |ip,num|
       assert_equal @klass.new(ip).to_s, @klass.parse_u128(num).to_s
