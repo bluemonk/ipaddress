@@ -516,7 +516,7 @@ module IPAddress;
       to_u32 <=> oth.to_u32
     end
     alias eql? ==
-    
+
     #
     # Returns the number of IP addresses included
     # in the network. It also counts the network
@@ -803,6 +803,44 @@ module IPAddress;
       Array.new(2**(subprefix-@prefix.to_i)) do |i|
         self.class.parse_u32(network_u32+(i*(2**(32-subprefix))), subprefix)
       end
+    end
+
+    #
+    # Subtract other from the current range
+    # Result is a list of ranges that are all a part of the current range
+    # excluding the other range
+    #
+    # Example:
+    #
+    #   whole_range = IPAddress '10.0.0.0/16'
+    #   sub_range = IPAddress '10.0.128.0/18'
+    #   non_overlap_range = IPAddress '192.168.0.0/16'
+    #
+    #   whole_range.subtract(sub_range)
+    #   =>
+    #   [#<IPAddress::IPv4:0x0000000111e61a88 @address="10.0.0.0", @allocator=0, @octets=[10, 0, 0, 0], @prefix=18, @u32=167772160>,
+    #    #<IPAddress::IPv4:0x0000000111e61470 @address="10.0.64.0", @allocator=0, @octets=[10, 0, 64, 0], @prefix=18, @u32=167788544>,
+    #    #<IPAddress::IPv4:0x0000000111e60840 @address="10.0.192.0", @allocator=0, @octets=[10, 0, 192, 0], @prefix=18, @u32=167821312>]
+    #   sub_range.subtract(whole_range)
+    #    => []
+    #   whole_range.subtract(non_overlap_range)
+    #    => [#<IPAddress::IPv4:0x0000000107f08978 @address="10.0.0.0", @allocator=0, @octets=[10, 0, 0, 0], @prefix=16, @u32=167772160>]
+    #
+    def subtract(other)
+      raise ArgumentError unless other.is_a? self.class
+
+      result = []
+      if include? other
+        split_bits = 2**(prefix - other.prefix)
+        other_alike_subnets = split split_bits
+        raise "Prefix of subnet and split doesn't match" unless other_alike_subnets.first.prefix == other.prefix
+
+        other_alike_subnets.delete other
+        result = other_alike_subnets
+      elsif !other.include? self
+        result << clone
+      end
+      result
     end
 
     #

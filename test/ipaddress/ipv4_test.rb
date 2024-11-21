@@ -491,6 +491,32 @@ class IPv4Test < Minitest::Test
     arr = ["172.16.10.0/24"]
     assert_equal arr, @network.subnet(24).map {|s| s.to_string}
   end
+
+  def test_method_subtract_result_not_include_subtrahend
+    whole_range = IPAddress '10.0.0.0/16'
+    sub_range = IPAddress '10.0.128.0/18'
+    assert !whole_range.subtract(sub_range).include?(sub_range)
+  end
+
+  def test_method_subtract_empty_result_if_subtract_whole
+    whole_range = IPAddress '10.0.0.0/16'
+    sub_range = IPAddress '10.0.128.0/18'
+    assert sub_range.subtract(whole_range).empty?
+  end
+
+  def test_method_subtract_non_overlap_range
+    whole_range = IPAddress '10.0.0.0/16'
+    non_overlap_range = IPAddress '192.168.0.0/16'
+    assert_equal 1, whole_range.subtract(non_overlap_range).size
+    assert_equal whole_range, whole_range.subtract(non_overlap_range).first
+  end
+
+  def test_method_subtract_inividual_address
+    whole_range = IPAddress '10.0.0.0/26'
+    one_ip_address = IPAddress '10.0.0.26'
+    assert_equal 2**(32 - 26) - 1, whole_range.subtract(one_ip_address).size
+    assert !whole_range.subtract(one_ip_address).include?(one_ip_address)
+  end
   
   def test_method_supernet
     assert_raises(ArgumentError) {@ip.supernet(24)}     
